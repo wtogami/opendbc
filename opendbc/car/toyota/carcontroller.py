@@ -46,12 +46,12 @@ def get_long_tune(CP, params):
     if Params().get_bool("ToyotaTSS2Long"):
       if CP.carFingerprint == CAR.TOYOTA_RAV4_TSS2:
         #optimal for rav4
-        kiBP = [0.,   .5,   5.,    12.,    20.,   27.,  40.]
-        kiV = [0.35, .35,   0.228,  0.2021,  0.172,  0.12, 0.1]
+        kiBP = [0.,   .6,   5.,  20.,   27.,  40.]
+        kiV = [.35, .35,  .225,  .174,  .105,  .1]
       else:
         #optimal for corolla
-        kiBP = [0.,   .2,    5.,   12.,    20.,   27.,  40.]
-        kiV = [0.346,  .35,  0.25,  0.2020,  0.172,  0.12, 0.1]
+        kiBP = [0.,   .6,   20.,   27.,  40.]
+        kiV = [.35, .35,   .1725, .106,  .102]
     else:
       kiBP = [2., 5.]
       kiV = [0.5, 0.25]
