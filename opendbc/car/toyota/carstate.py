@@ -1,7 +1,7 @@
 import copy
 import numpy as np
 from cereal import custom
-from openpilot.common.params import Params, put_nonblocking
+from openpilot.common.params import Params
 from opendbc.can.can_define import CANDefine
 from opendbc.can.parser import CANParser
 from opendbc.car import Bus, DT_CTRL, create_button_events, structs
@@ -262,7 +262,6 @@ class CarState(CarStateBase):
       prev_distance_button = self.distance_button
       if self.CP.carFingerprint in (SECOC_CAR):
         self.distance_button = cp.vl["PCM_CRUISE_4"]["DISTANCE"]
-        put_nonblocking('LongitudinalPersonality', str(int(max(self.distance_button - 1, 0))))
       else:
         self.distance_button = cp_acc.vl["ACC_CONTROL"]["DISTANCE"]
 
