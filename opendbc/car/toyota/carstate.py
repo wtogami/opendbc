@@ -144,7 +144,7 @@ class CarState(CarStateBase):
       else:
         self.accel_profile = AccelPersonality.normal
 
-      print(f"Accel profile set to: {self.accel_profile}")
+      #print(f"Accel profile set to: {self.accel_profile}")
 
       # If not initialized, sync profile with the current mode on the car
       if not self.accel_profile_init or self.accel_profile != self.prev_accel_profile:
@@ -262,7 +262,7 @@ class CarState(CarStateBase):
       prev_distance_button = self.distance_button
       if self.CP.carFingerprint in (SECOC_CAR):
         self.distance_button = cp.vl["PCM_CRUISE_4"]["DISTANCE"]
-        Params().put_nonblocking('LongitudinalPersonality', str(int(max(self.distance_button - 1, 0))))
+        #Params().put_nonblocking('LongitudinalPersonality', str(int(max(self.distance_button - 1, 0))))
       else:
         self.distance_button = cp_acc.vl["ACC_CONTROL"]["DISTANCE"]
 
