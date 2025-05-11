@@ -161,7 +161,7 @@ class CarInterface(CarInterfaceBase):
         if candidate == CAR.TOYOTA_RAV4_TSS2:
           ret.stoppingDecelRate = 0.3  # optimal on rav4
         else:
-          ret.stoppingDecelRate = 0.007  # optimal on corollaH, prius
+          ret.stoppingDecelRate = 0.02  # optimal on corollaH, prius
       else:
         ret.vEgoStopping = 0.25
         ret.vEgoStarting = 0.25
