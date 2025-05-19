@@ -1,3 +1,4 @@
+from common.params import Params
 import math
 import numpy as np
 from openpilot.common.params import Params
@@ -95,7 +96,8 @@ class CarController(CarControllerBase, SecOCLongCarController):
     self.secoc_lka_message_counter = 0
     self.secoc_lta_message_counter = 0
     self.secoc_prev_reset_counter = 0
-
+    #Invert ACC Increments
+    self.invert_acc_increments = self.CP_SP.customAccControl.mode == structs.CarParamsSP.CustomAccControl.Mode.reverse
     self.left_blindspot_debug_enabled = False
     self.right_blindspot_debug_enabled = False
     self.last_blindspot_frame = 0
@@ -220,6 +222,9 @@ class CarController(CarControllerBase, SecOCLongCarController):
     steer_alert = hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw)
     lead = hud_control.leadVisible or CS.out.vEgo < 12.  # at low speed we always assume the lead is present so ACC can be engaged
 
+    # Invert ACC Increments
+    allow_long_press = 2 if self.invert_acc_increments else 1
+
     if self.CP.openpilotLongitudinalControl:
       if self.frame % 3 == 0:
         # Press distance button until we are at the correct bar length. Only change while enabled to avoid skipping startup popup
@@ -279,7 +284,7 @@ class CarController(CarControllerBase, SecOCLongCarController):
         pcm_accel_cmd = float(np.clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX))
 
         can_sends.append(toyotacan.create_accel_command(self.packer, pcm_accel_cmd, pcm_cancel_cmd, self.permit_braking, self.standstill_req, lead,
-                                                        CS.acc_type, fcw_alert, self.distance_button, self.SECOC_LONG))
+                                                        CS.acc_type, fcw_alert, self.distance_button, self.SECOC_LONG, allow_long_press))
         self.accel = pcm_accel_cmd
 
     else:
@@ -289,7 +294,7 @@ class CarController(CarControllerBase, SecOCLongCarController):
           can_sends.append(toyotacan.create_acc_cancel_command(self.packer))
         else:
           can_sends.append(toyotacan.create_accel_command(self.packer, 0, pcm_cancel_cmd, True, False, lead, CS.acc_type, False, self.distance_button,
-                                                          self.SECOC_LONG))
+                                                          self.SECOC_LONG, allow_long_press))
 
     # *** hud ui ***
     if self.CP.carFingerprint != CAR.TOYOTA_PRIUS_V:
