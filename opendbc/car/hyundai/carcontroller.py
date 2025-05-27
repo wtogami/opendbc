@@ -320,11 +320,17 @@ class CarController(CarControllerBase, EsccCarController, LongitudinalController
         adaptive_ramp_rate = max(torque_delta / self.angle_torque_override_cycles, 1)  # Ensure at least 1 unit per cycle
         self.lkas_max_torque = max(self.lkas_max_torque - adaptive_ramp_rate, self.angle_min_torque)
       else:
-        self.lkas_max_torque = self.calc.calculate_torque(
+        target_torque = self.calc.calculate_torque(
           desired_lat_accel=actuators.curvature * CS.out.vEgoRaw ** 2,
           ego_velocity=CS.out.vEgoRaw,
           lkas_active=CC.latActive
         )
+
+        # Ramp up or down toward the target torque smoothly
+        if self.lkas_max_torque > target_torque:
+          self.lkas_max_torque = max(self.lkas_max_torque - self.params.ANGLE_RAMP_DOWN_RATE, target_torque)
+        else:
+          self.lkas_max_torque = min(self.lkas_max_torque + self.params.ANGLE_RAMP_UP_RATE, target_torque)
 
       # Safety clamp
       self.lkas_max_torque = float(np.clip(self.lkas_max_torque, self.angle_min_torque, self.angle_max_torque))
