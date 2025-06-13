@@ -283,7 +283,7 @@ class CarState(CarStateBase):
       self.pre_collision_2 = copy.copy(cp_cam.vl["PRE_COLLISION_2"])
 
     self._update_traffic_signals(cp_cam)
-    ret.cruiseState.speedLimit = self._calculate_speed_limit()
+    ret_sp.speedLimit = self._calculate_speed_limit()
 
     self.frame += 1
     return ret, ret_sp
