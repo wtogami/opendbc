@@ -1286,6 +1286,24 @@ FW_VERSIONS = {
       b'\xf1\x00T01960BL  T01E60A1  DOS2T16X4XE60NS4N\x90\xe6\xcb',
     ],
   },
+    CAR.HYUNDAI_SANTA_FE_5TH_GEN: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00MX5 MFC  AT USA LHD 1.00 1.06 99211-R6000 231218',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00MX5_ RDR -----      1.00 1.01 99110-R6000         ',
+    ],
+  },
+  CAR.HYUNDAI_SANTA_FE_HEV_5TH_GEN: {
+    (Ecu.fwdCamera, 0x7c4, None): [
+      b'\xf1\x00MX5HMFC  AT KOR LHD 1.00 1.07 99211-P6000 231218',
+      b'\xf1\x00MX5HMFC  AT USA LHD 1.00 1.06 99211-R6000 231218',
+    ],
+    (Ecu.fwdRadar, 0x7d0, None): [
+      b'\xf1\x00MX5_ RDR -----      1.00 1.01 99110-P6000         ',
+      b'\xf1\x00MX5_ RDR -----      1.00 1.01 99110-R6000         ',
+    ],
+  },
 }
 
 FW_VERSIONS = merge_fw_versions(FW_VERSIONS, FW_VERSIONS_EXT)
