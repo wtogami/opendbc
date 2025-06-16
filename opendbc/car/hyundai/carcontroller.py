@@ -93,8 +93,8 @@ def apply_hyundai_steer_angle_limits(apply_angle: float, apply_angle_last: float
     apply_angle = np.clip(apply_angle, steering_angle - override_cap, steering_angle + override_cap)
 
   # If the vehicle speed is above the maximum speed in the smoothing matrix, apply smoothing
-  if frames_since_override < OVERRIDE_FRAME_WINDOW_MAX and abs(v_ego_raw) < CarControllerParams.SMOOTHING_ANGLE_MAX_VEGO:
-    apply_angle = sp_smooth_angle(v_ego_raw, apply_angle, apply_angle_last)
+  #if frames_since_override < OVERRIDE_FRAME_WINDOW_MAX and abs(v_ego_raw) < CarControllerParams.SMOOTHING_ANGLE_MAX_VEGO:
+  #  apply_angle = sp_smooth_angle(v_ego_raw, apply_angle, apply_angle_last)
 
   # *** max lateral jerk limit ***
   max_angle_delta = get_max_angle_delta(max(v_ego_raw, 1), VM)
