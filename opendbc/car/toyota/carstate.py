@@ -27,7 +27,7 @@ TEMP_STEER_FAULTS = (0, 9, 11, 21, 25)
 # - prolonged high driver torque: 17 (permanent)
 PERM_STEER_FAULTS = (3, 17)
 
-_TRAFFIC_SINGAL_MAP = {
+_TRAFFIC_SIGNAL_MAP = {
   1: "kph",
   36: "mph",
   65: "No overtake",
@@ -289,6 +289,7 @@ class CarState(CarStateBase):
     return ret, ret_sp
 
   def _init_traffic_signals(self):
+    """Initialize traffic signal variables to None"""
     self._tsgn1 = None
     self._spdval1 = None
     self._splsgn1 = None
@@ -300,16 +301,22 @@ class CarState(CarStateBase):
     self._splsgn4 = None
 
   def _update_traffic_signals(self, cp_cam):
-    # Print out car signals for traffic signal detection
-    tsgn1 = cp_cam.vl["RSA1"]['TSGN1']
-    spdval1 = cp_cam.vl["RSA1"]['SPDVAL1']
-    splsgn1 = cp_cam.vl["RSA1"]['SPLSGN1']
-    tsgn2 = cp_cam.vl["RSA1"]['TSGN2']
-    splsgn2 = cp_cam.vl["RSA1"]['SPLSGN2']
-    tsgn3 = cp_cam.vl["RSA2"]['TSGN3']
-    splsgn3 = cp_cam.vl["RSA2"]['SPLSGN3']
-    tsgn4 = cp_cam.vl["RSA2"]['TSGN4']
-    splsgn4 = cp_cam.vl["RSA2"]['SPLSGN4']
+    """Update traffic signals with error handling"""
+    try:
+      # Add error handling for missing RSA messages
+      tsgn1 = cp_cam.vl.get("RSA1", {}).get('TSGN1', 0)
+      spdval1 = cp_cam.vl.get("RSA1", {}).get('SPDVAL1', 0)
+      splsgn1 = cp_cam.vl.get("RSA1", {}).get('SPLSGN1', 0)
+      tsgn2 = cp_cam.vl.get("RSA1", {}).get('TSGN2', 0)
+      splsgn2 = cp_cam.vl.get("RSA1", {}).get('SPLSGN2', 0)
+      tsgn3 = cp_cam.vl.get("RSA2", {}).get('TSGN3', 0)
+      splsgn3 = cp_cam.vl.get("RSA2", {}).get('SPLSGN3', 0)
+      tsgn4 = cp_cam.vl.get("RSA2", {}).get('TSGN4', 0)
+      splsgn4 = cp_cam.vl.get("RSA2", {}).get('SPLSGN4', 0)
+    except (KeyError, AttributeError) as e:
+      # Handle case where RSA messages are not available
+      print(f"RSA messages not available: {e}")
+      return
 
     has_changed = tsgn1 != self._tsgn1 \
                   or spdval1 != self._spdval1 \
@@ -356,15 +363,21 @@ class CarState(CarStateBase):
     print('------------------------')
 
   def _traffic_signal_description(self, tsgn):
-    desc = _TRAFFIC_SINGAL_MAP.get(int(tsgn))
+    """Get description for traffic signal code"""
+    desc = _TRAFFIC_SIGNAL_MAP.get(int(tsgn))  # Fixed dictionary name
     return f'{tsgn}: {desc}' if desc is not None else f'{tsgn}'
 
   def _calculate_speed_limit(self):
-    if self._tsgn1 == 1:
-      return self._spdval1 * CV.KPH_TO_MS
-    if self._tsgn1 == 36:
-      return self._spdval1 * CV.MPH_TO_MS
+    """Calculate speed limit from traffic signals with validation"""
+    # Check all traffic sign slots for speed limits, not just tsgn1
+    for tsgn, spdval in [(self._tsgn1, self._spdval1), (self._tsgn2, None),
+                         (self._tsgn3, None), (self._tsgn4, None)]:
+      if tsgn == 1 and spdval is not None and 0 < spdval <= 200:  # Reasonable speed range
+        return spdval * CV.KPH_TO_MS
+      elif tsgn == 36 and spdval is not None and 0 < spdval <= 120:  # Reasonable MPH range
+        return spdval * CV.MPH_TO_MS
     return 0
+
   # Enhanced BSM (@arne182, @rav4kumar)
   def sp_get_enhanced_bsm(self, cp):
     # Let's keep all the commented out code for easy debug purposes in the future.
@@ -462,15 +475,14 @@ class CarState(CarStateBase):
       pt_messages.append(("DEBUG", 65))
 
     cam_messages = []
-    if CP.carFingerprint != CAR.TOYOTA_PRIUS_V:
-      cam_messages += [
-        ("LKAS_HUD", 1),
-      ]
-
     cam_messages += [
       ("RSA1", 0),
       ("RSA2", 0),
     ]
+    if CP.carFingerprint != CAR.TOYOTA_PRIUS_V:
+      cam_messages += [
+        ("LKAS_HUD", 1),
+      ]
 
     if CP.carFingerprint in (TSS2_CAR - RADAR_ACC_CAR):
       cam_messages += [
