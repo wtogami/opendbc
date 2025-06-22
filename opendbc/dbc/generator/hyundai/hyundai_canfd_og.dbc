@@ -1,5 +1,6 @@
 CM_ "IMPORT _hyundai_common.dbc";
 CM_ "IMPORT _hyundai_canfd_ccnc.dbc";
+CM_ "IMPORT _hyundai_canfd_ccnc_og.dbc";
 
 BO_ 53 ACCELERATOR: 32 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -47,13 +48,6 @@ BO_ 160 WHEEL_SPEEDS: 24 XXX
  SG_ WHL_SpdRLVal : 96|14@1+ (0.03125,0) [0|0] "km^h" XXX
  SG_ WHL_SpdRRVal : 112|14@1+ (0.03125,0) [0|0] "km^h" XXX
 
-BO_ 203 LFA_ALT: 24 ADRV
- SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
- SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ LKAS_ANGLE_ACTIVE : 29|2@0+ (1,0) [0|1] "" XXX
- SG_ LKAS_ANGLE_CMD : 32|14@1- (0.1,0) [0|511] "" XXX
- SG_ LKAS_ANGLE_MAX_TORQUE : 55|8@0+ (1,0) [0|255] "" XXX
-
 BO_ 234 MDPS: 24 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
@@ -77,26 +71,6 @@ BO_ 261 ACCELERATOR_ALT: 32 XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ ACCELERATOR_PEDAL : 103|10@1+ (0.25,0) [0|1022] "" XXX
 
-BO_ 272 LKAS_ALT: 32 XXX
- SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
- SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ LKA_MODE : 24|3@1+ (1,0) [0|7] "" XXX
- SG_ LKA_AVAILABLE : 27|2@1+ (1,0) [0|255] "" XXX
- SG_ LKA_WARNING : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
- SG_ FCA_SYSWARN : 40|1@0+ (1,0) [0|1] "" XXX
- SG_ TORQUE_REQUEST : 41|11@1+ (1,-1024) [0|4095] "" XXX
- SG_ STEER_REQ : 52|1@1+ (1,0) [0|1] "" XXX
- SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|255] "" XXX
- SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|1] "" XXX
- SG_ STEER_MODE : 65|3@1+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
- SG_ LKAS_ANGLE_ACTIVE : 77|2@0+ (1,0) [0|3] "" XXX
- SG_ HAS_LANE_SAFETY : 80|1@0+ (1,0) [0|1] "" XXX
- SG_ LKAS_ANGLE_CMD : 82|14@1- (0.1,0) [0|511] "" XXX
- SG_ LKAS_ANGLE_MAX_TORQUE : 96|8@1+ (1,0) [0|255] "" XXX
- SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
-
 BO_ 282 FR_CMR_01_10ms: 16 FR_CMR
  SG_ FR_CMR_Crc1Val : 0|16@1+ (1,0) [0|0] "" Dummy,IBU_HS,vBDM
  SG_ FR_CMR_AlvCnt1Val : 16|8@1+ (1,0) [0|0] "" CLU,IBU_HS,vBDM
@@ -117,33 +91,12 @@ BO_ 282 FR_CMR_01_10ms: 16 FR_CMR
  SG_ DAW_WrnMsgSta : 59|3@1+ (1,0) [0|0] "" CLU
  SG_ DAW_TimeRstReq : 62|2@1+ (1,0) [0|0] "" CLU
  SG_ DAW_SnstvtyModRetVal : 64|3@1+ (1,0) [0|0] "" CLU,H_U_MMz
- SG_ FR_CMR_SCCEquipSta : 85|2@1+ (1,0) [0|3] "" CGW
- SG_ FR_CMR_ReqADASMapMsgVal : 96|16@1+ (1,0) [0|65535] "" CGW
- SG_ FR_CMR_SwVer1Val : 112|4@1+ (1,0) [0|15] "" CGW
- SG_ FR_CMR_SwVer2Val : 120|8@1+ (1,0) [0|255] "" CGW
 
 BO_ 293 STEERING_SENSORS: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
  SG_ STEERING_ANGLE : 24|16@1- (0.1,0) [0|255] "deg" XXX
  SG_ STEERING_RATE : 40|8@1+ (4,0) [0|1016] "deg/s" XXX
-
-BO_ 298 LFA: 16 ADRV
- SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
- SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
- SG_ LKA_MODE : 24|3@1+ (1,0) [0|7] "" XXX
- SG_ NEW_SIGNAL_1 : 27|2@1+ (1,0) [0|255] "" XXX
- SG_ LKA_WARNING : 32|1@1+ (1,0) [0|1] "" XXX
- SG_ LKA_ICON : 38|2@1+ (1,0) [0|255] "" XXX
- SG_ TORQUE_REQUEST : 41|11@1+ (1,-1024) [0|4095] "" XXX
- SG_ STEER_REQ : 52|1@1+ (1,0) [0|1] "" XXX
- SG_ LFA_BUTTON : 56|1@1+ (1,0) [0|255] "" XXX
- SG_ LKA_ASSIST : 62|1@1+ (1,0) [0|1] "" XXX
- SG_ STEER_MODE : 65|3@1+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_2 : 70|2@0+ (1,0) [0|3] "" XXX
- SG_ NEW_SIGNAL_4 : 72|4@1+ (1,0) [0|15] "" XXX
- SG_ HAS_LANE_SAFETY : 80|1@0+ (1,0) [0|1] "" XXX
- SG_ NEW_SIGNAL_3 : 111|8@0+ (1,0) [0|255] "" XXX
 
 BO_ 304 GEAR_SHIFTER: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
@@ -384,7 +337,8 @@ BO_ 437 FR_CMR_03_50ms: 32 FR_CMR
  SG_ Info_RtLnHdingAnglVal : 115|10@1- (0.000976563,0) [-0.500000256|0.499023693] "rad" RR_C_RDR,CGW
  SG_ Info_RtLnCvtrVal : 128|16@1- (1,0) [0|65535] "" CGW
  SG_ Info_RtLnCrvtrDrvtvVal : 144|16@1- (1,0) [0|65535] "" CGW
- SG_ ID_CIPV : 192|7@1+ (1,0) [0|127] "" Dummy
+ SG_ ID_CIPV : 192|8@1+ (1,0) [0|255] "" XXX
+ SG_ Relative_Velocity : 200|12@1+ (0.05,-100) [-100|104.75] "m/s" Dummy
  SG_ Longitudinal_Distance : 212|12@1+ (0.05,0) [0|204.75] "m" Dummy
 
 BO_ 442 BLINDSPOTS_REAR_CORNERS: 24 XXX
@@ -611,10 +565,6 @@ BO_ 874 BLINDSPOTS_FRONT_CORNER_2: 16 XXX
  SG_ CHECKSUM : 0|16@1+ (1,0) [0|65535] "" XXX
  SG_ COUNTER : 16|8@1+ (1,0) [0|255] "" XXX
 
-BO_ 917 CCNC_0x395: 32 XXX
- SG_ DRIVER_OVERIDE_STEERING_1 : 88|1@0+ (1,0) [0|1] "" XXX
- SG_ DRIVER_OVERIDE_STEERING_2 : 89|3@1+ (1,0) [0|15] "" XXX
-
 BO_ 961 BLINKER_STALKS: 8 XXX
  SG_ CHECKSUM_MAYBE : 7|8@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER_ALT : 15|4@0+ (1,0) [0|15] "" XXX
@@ -677,10 +627,6 @@ BO_ 1264 LOCAL_TIME: 8 XXX
 
 CM_ SG_ 96 BRAKE_PRESSURE "User applied brake pedal pressure. Ramps from computer applied pressure on falling edge of cruise. Cruise cancels if !=0";
 CM_ SG_ 101 BRAKE_POSITION "User applied brake pedal position, max is ~700. Signed on some vehicles";
-CM_ BO_ 272 "Alternative LKAS message, used on cars such as 2023 Ioniq 6, 2nd gen Kona. Matches LKAS except size is 32 bytes";
-CM_ SG_ 272 LKA_AVAILABLE "Angle control cars: 3 when LKA is generally available, goes to 0 during changes with LFA";
-CM_ SG_ 272 LKAS_ANGLE_CMD "tracks MDPS->STEERING_ANGLE when not engaged, not STEERING_SENSORS->STEERING_ANGLE";
-CM_ SG_ 298 NEW_SIGNAL_4 "todo: figure out why always set to 9";
 CM_ SG_ 352 SET_ME_9 "has something to do with AEB settings";
 CM_ SG_ 373 ACCEnable "Likely a copy of CAN's TCS13->ACCEnable";
 CM_ SG_ 373 DriverBraking "Likely derived from BRAKE->BRAKE_POSITION";
@@ -704,9 +650,6 @@ VAL_ 69 GEAR 0 "P" 5 "D" 6 "N" 7 "R";
 VAL_ 96 TRACTION_AND_STABILITY_CONTROL 0 "On" 5 "Limited" 1 "Off";
 VAL_ 112 GEAR 0 "P" 5 "D" 6 "N" 7 "R";
 VAL_ 234 LKA_FAULT 0 "ok" 1 "lka fault";
-VAL_ 272 LKA_MODE 1 "warning only" 2 "assist" 6 "off";
-VAL_ 272 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green";
-VAL_ 272 LKAS_ANGLE_ACTIVE 0 "off" 1 "not active" 2 "active";
 VAL_ 282 HBA_SysOptSta 0 "None HBA Option (Default)" 1 "HBA Option" 2 "Reserved" 3 "Error indicator";
 VAL_ 282 HBA_SysSta 0 "HBA Disable" 1 "HBA Enable & High Beam Off" 2 "HBA Enable & High Beam On" 3 "Reserved" 4 "Reserved" 5 "Reserved" 6 "Reserved" 7 "System Fail";
 VAL_ 282 HBA_IndLmpReq 0 "HBA Indicator Lamp Off" 1 "HBA Indicator Lamp On" 2 "Reserved" 3 "Error indicator";
@@ -719,9 +662,6 @@ VAL_ 282 DAW_SysSta 0 "System Off" 1 "Attention Level  1" 2 "Attention Level  2"
 VAL_ 282 DAW_WrnMsgSta 0 "No Warning" 1 "Rest Recommend Warning" 2 "Hands-Off TMS call request" 3 "Reserved" 4 "Reserved" 5 "Reserved" 6 "Reserved" 7 "Error indicator";
 VAL_ 282 DAW_TimeRstReq 0 "No signal" 1 "Time reset" 2 "Reserved" 3 "Error indicator";
 VAL_ 282 DAW_SnstvtyModRetVal 0 "Default" 1 "Late" 2 "Normal" 3 "Reserved" 4 "Reserved" 5 "Reserved" 6 "Reserved" 7 "Invalid";
-VAL_ 282 FR_CMR_SCCEquipSta 0 "Not Applied" 1 "Applied" 2 "Not used" 3 "Error Indicator";
-VAL_ 298 LKA_MODE 1 "warning only" 2 "assist" 6 "off";
-VAL_ 298 LKA_ICON 0 "hidden" 1 "grey" 2 "green" 3 "flashing green";
 VAL_ 304 PARK_BUTTON 1 "Pressed" 2 "Not Pressed";
 VAL_ 304 KNOB_POSITION 1 "R" 2 "N (on R side)" 3 "Centered" 4 "N (on D side)" 5 "D";
 VAL_ 304 GEAR 1 "P" 2 "R" 3 "N" 4 "D";
@@ -793,10 +733,6 @@ VAL_ 362 BLINKER_CONTROL 1 "hazards" 2 "hazards button backlight" 3 "left blinke
 VAL_ 373 ACCEnable 0 "SCC ready" 1 "SCC temp fault" 2 "SCC permanent fault" 3 "SCC permanent fault, communication issue";
 VAL_ 416 ACCMode 0 "off" 1 "enabled" 2 "driver_override" 3 "off_maybe_fault" 4 "cancelled";
 VAL_ 426 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 "pause_resume";
-VAL_ 437 Info_LftLnQualSta 0 "Very Low Quality" 1 "Low Quality" 2 "High Quality" 3 "Very High Quality" 4 "Reserved" 5 "Reserved" 6 "Reserved" 7 "Error indicator";
-VAL_ 437 Info_LftLnDptSta 0 "No Left Line Departure" 1 "Left Line Departure" 2 "Reserved" 3 "Error Indicator";
-VAL_ 437 Info_RtLnQualSta 0 "Very Low Quality" 1 "Low Quality" 2 "High Quality" 3 "Very High Quality" 4 "Reserved" 5 "Reserved" 6 "Reserved" 7 "Error indicator";
-VAL_ 437 Info_RtLnDptSta 0 "No Right Line Departure" 1 "Right Line Departure" 2 "Reserved" 3 "Error Indicator";
 VAL_ 437 Info_RtLnCvtrVal 65534 "Reserved" 65535 "Error indicator";
 VAL_ 463 CRUISE_BUTTONS 0 "none" 1 "res_accel" 2 "set_decel" 3 "gap_distance" 4 "pause_resume";
 VAL_ 463 RIGHT_PADDLE 0 "Not Pulled" 1 "Pulled";
