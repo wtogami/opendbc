@@ -25,6 +25,79 @@ from opendbc.sunnypilot.car.hyundai.escc import EsccCarController
 from opendbc.sunnypilot.car.hyundai.longitudinal.controller import LongitudinalController
 from opendbc.sunnypilot.car.hyundai.mads import MadsCarController
 
+# Added class for managing LKAS torque calculations
+class LkasTorqueManager:
+  def __init__(self, params):
+    self.params = params
+    self.max_torque = 0
+    self.min_torque = params.ANGLE_MIN_TORQUE if hasattr(params, 'ANGLE_MIN_TORQUE') else 0
+    self.max_allowed_torque = 0
+    self.min_active_torque = 0
+    self.override_cycles = 100  # Default value
+    self.override_counter = 0
+    self.last_override_state = False
+
+  def update_params(self, max_torque, min_active_torque, override_cycles):
+    """Update parameters from user configuration"""
+    self.max_allowed_torque = max_torque
+    self.min_active_torque = min_active_torque
+    self.override_cycles = override_cycles if override_cycles > 0 else 100
+
+  def calculate_target_torque(self, required_torque):
+    """Calculate target torque based on the actuator's requested torque"""
+    active_min_torque = max(0.30 * self.max_allowed_torque, self.min_active_torque)
+    return int(np.interp(abs(required_torque), [0., 1.], [active_min_torque, self.max_allowed_torque]))
+
+  def calculate_override_torque_reduction_gain(self):
+    """Calculate torque during driver override"""
+    target_torque = self.min_torque
+    torque_delta = self.max_torque - target_torque
+    adaptive_ramp_rate = max(torque_delta / self.override_cycles, 1)  # Ensure at least 1 unit per cycle
+    self.max_torque = max(self.max_torque - adaptive_ramp_rate, self.min_torque)
+    self.override_counter += 1
+
+  def calculate_torque_reduction_gain(self, actuator_torque):
+    """Calculate torque during normal operation (no override)"""
+    target_torque = self.calculate_target_torque(actuator_torque)
+
+    # Ramp up or down toward target torque smoothly
+    if self.max_torque > target_torque:
+      self.max_torque = max(self.max_torque - self.params.ANGLE_RAMP_DOWN_RATE, target_torque)
+    else:
+      self.max_torque = min(self.max_torque + self.params.ANGLE_RAMP_UP_RATE, target_torque)
+
+  def update(self, actuators, CS, lat_active):
+    """
+    Update LKAS max torque based on current conditions
+
+    Parameters:
+      actuators: The complete actuators object with all control signals
+      CS: The complete car state object with all vehicle state information
+      lat_active: Boolean indicating if lateral control is active
+
+    Returns:
+      max_torque: The calculated maximum torque
+    """
+    # Extract the specific values we need from the objects
+    expected_torque = actuators.torque
+    is_steering_pressed = CS.out.steeringPressed
+
+    if not lat_active:
+      self.max_torque = 0
+      self.override_counter = 0
+      return self.max_torque
+
+    if not is_steering_pressed:
+      self.calculate_torque_reduction_gain(expected_torque)
+      self.override_counter = 0  # Reset override counter when not overriding
+    else:
+      self.calculate_override_torque_reduction_gain()
+
+    # Apply safety limits and determine steering request
+    self.max_torque = float(np.clip(self.max_torque, self.min_torque, self.max_allowed_torque))
+    return self.max_torque
+
+
 VisualAlert = structs.CarControl.HUDControl.VisualAlert
 LongCtrlState = structs.CarControl.Actuators.LongControlState
 
@@ -79,7 +152,7 @@ def sp_smooth_angle(v_ego_raw: float, apply_angle: float, apply_angle_last: floa
 
 
 def apply_hyundai_steer_angle_limits(apply_angle: float, apply_angle_last: float, v_ego_raw: float, steering_angle: float,
-                                     lat_active: bool, limits: AngleSteeringLimits, VM: VehicleModel, real_a_lat: float = None) -> float:
+                                     lat_active: bool, limits: AngleSteeringLimits, VM: VehicleModel) -> float:
   apply_angle = np.clip(apply_angle, -819.2, 819.1)
 
   # If the vehicle speed is above the maximum speed in the smoothing matrix, apply smoothing
@@ -88,9 +161,6 @@ def apply_hyundai_steer_angle_limits(apply_angle: float, apply_angle_last: float
 
   # *** max lateral jerk limit ***
   max_angle_delta = get_max_angle_delta(max(v_ego_raw, 1), VM)
-  if abs(real_a_lat) > MAX_LATERAL_ACCEL:
-    scale = min(1.0, MAX_LATERAL_ACCEL / abs(real_a_lat))
-    max_angle_delta *= scale
 
   # prevent fault
   max_angle_delta = min(max_angle_delta, MAX_ANGLE_RATE)
@@ -152,21 +222,30 @@ class CarController(CarControllerBase, EsccCarController, LongitudinalController
     self.accel_last = 0
     self.apply_torque_last = 0
     self.apply_angle_last = 0
-    self.lkas_max_torque = 0
     self.last_button_frame = 0
     self.angle_limit_counter = 0
-    # self.smoothing_factor = 0.6
+    self.lkas_max_torque = 0
 
+    # Initialize default values
     self.angle_min_active_torque = self.params.ANGLE_MIN_TORQUE
     self.angle_max_torque = self.params.ANGLE_MAX_TORQUE
     self.angle_torque_override_cycles = self.params.ANGLE_TORQUE_OVERRIDE_CYCLES
+
+    # Initialize torque manager
+    self.torque_manager = LkasTorqueManager(self.params)
+
     self._params = Params() if PARAMS_AVAILABLE else None
     if PARAMS_AVAILABLE:
-      # self.live_tuning = self._params.get_bool("HkgAngleLiveTuning")
-      # self.smoothing_factor = float(self._params.get("HkgTuningAngleSmoothingFactor")) / 10.0 if self._params.get("HkgTuningAngleSmoothingFactor") else 0.0
       self.angle_min_active_torque = int(self._params.get("HkgTuningAngleMinTorque")) if self._params.get("HkgTuningAngleMinTorque") else 0
       self.angle_max_torque = int(self._params.get("HkgTuningAngleMaxTorque")) if self._params.get("HkgTuningAngleMaxTorque") else 0
       self.angle_torque_override_cycles = int(self._params.get("HkgTuningOverridingCycles")) if self._params.get("HkgTuningOverridingCycles") else 0
+
+      # Update torque manager with parameters
+      self.torque_manager.update_params(
+        self.angle_max_torque,
+        self.angle_min_active_torque,
+        self.angle_torque_override_cycles
+      )
 
 
   def update(self, CC, CC_SP, CS, now_nanos):
@@ -190,34 +269,18 @@ class CarController(CarControllerBase, EsccCarController, LongitudinalController
 
     # angle control
     else:
-      lat_accel = CS.imu_lateral_acceleration * -9.8
+      # lat_accel = CS.imu_lateral_acceleration * -9.8
       self.apply_angle_last = apply_hyundai_steer_angle_limits(actuators.steeringAngleDeg, self.apply_angle_last, CS.out.vEgoRaw,
                                                                CS.out.steeringAngleDeg, CC.latActive,
-                                                               CarControllerParams.ANGLE_LIMITS, self.VM, lat_accel)
-      if CS.out.steeringPressed:  # User is overriding
-        # Let's try to consider that the override is not a true or false but a progressive depending on how much torque is being applied to the col
-        target_torque = self.params.ANGLE_MIN_TORQUE
-        torque_delta = self.lkas_max_torque - target_torque
-        adaptive_ramp_rate = max(torque_delta / self.angle_torque_override_cycles, 1)  # Ensure at least 1 unit per cycle
-        self.lkas_max_torque = max(self.lkas_max_torque - adaptive_ramp_rate, self.params.ANGLE_MIN_TORQUE)
-      else:
-        active_min_torque = max(0.30 * self.angle_max_torque, self.angle_min_active_torque)  # 0.3 is the minimum torque when the user is not overriding
-        target_torque = int(np.interp(abs(actuators.torque), [0., 1.], [active_min_torque, self.angle_max_torque]))
+                                                               CarControllerParams.ANGLE_LIMITS, self.VM)
 
-        # Ramp up or down toward the target torque smoothly
-        if self.lkas_max_torque > target_torque:
-          self.lkas_max_torque = max(self.lkas_max_torque - self.params.ANGLE_RAMP_DOWN_RATE, target_torque)
-        else:
-          self.lkas_max_torque = min(self.lkas_max_torque + self.params.ANGLE_RAMP_UP_RATE, target_torque)
-
-      apply_steer_req = CC.latActive and self.lkas_max_torque != 0
-
-      # Safety clamp
-      self.lkas_max_torque = float(np.clip(self.lkas_max_torque, self.params.ANGLE_MIN_TORQUE, self.angle_max_torque))
+      self.lkas_max_torque = self.torque_manager.update(actuators, CS, CC.latActive)
+      apply_steer_req = self.lkas_max_torque != 0
 
     if not CC.latActive:
       apply_torque = 0
       self.lkas_max_torque = 0
+      apply_steer_req = False
 
     # Hold torque with induced temporary fault when cutting the actuation bit
     # FIXME: we don't use this with CAN FD?
