@@ -143,6 +143,8 @@ class CarController(CarControllerBase, EsccCarController, LongitudinalController
       self.active_torque_reduction_gain = parse_tq_rdc_gain(self._params.get("HkgTuningAngleActiveTorqueReductionGain")) or self.active_torque_reduction_gain
       self.angle_torque_override_cycles = int(self._params.get("HkgTuningOverridingCycles") or self.angle_torque_override_cycles)
       self.angle_enable_smoothing_factor = self._params.get_bool("EnableHkgTuningAngleSmoothingFactor")
+      self.angle_limits.MAX_LATERAL_ACCEL = parse_scaled_value(self._params.get("HkgMaxLateralAccel")) or self.angle_limits.MAX_LATERAL_ACCEL
+      self.angle_limits.MAX_LATERAL_JERK = parse_scaled_value(self._params.get("HkgMaxLateralJerk")) or self.angle_limits.MAX_LATERAL_JERK
 
 
   def update(self, CC, CC_SP, CS, now_nanos):
