@@ -66,7 +66,8 @@ class CarController(CarControllerBase, SecOCLongCarController):
     # *** start long control state ***
     self.long_pid = get_long_tune(self.CP, self.params)
     self.aego = FirstOrderFilter(0.0, 0.25, DT_CTRL * 3)
-    self.pitch = FirstOrderFilter(0, 0.5, DT_CTRL)
+    self.pitch = FirstOrderFilter(0, 0.25, DT_CTRL)
+    self.pitch_slow = FirstOrderFilter(0, 1.5, DT_CTRL)
 
     self.accel = 0
     self.prev_accel = 0
@@ -87,6 +88,7 @@ class CarController(CarControllerBase, SecOCLongCarController):
 
     if len(CC.orientationNED) == 3:
       self.pitch.update(CC.orientationNED[1])
+      self.pitch_slow.update(CC.orientationNED[1])
 
     # *** control msgs ***
     can_sends = []
@@ -225,10 +227,18 @@ class CarController(CarControllerBase, SecOCLongCarController):
           self.long_pid.i -= ACCEL_PID_UNWIND * float(np.sign(self.long_pid.i))
 
           error_future = pcm_accel_cmd - a_ego_future
+
+          if not stopping:
+            # feedforward compensation for changes in pitch
+            high_pass_pitch = self.pitch.x - self.pitch_slow.x
+            pitch_compensation = float(np.clip(math.sin(high_pass_pitch) * ACCELERATION_DUE_TO_GRAVITY, -1.5, 1.5))
+            pcm_accel_cmd += pitch_compensation
+
           pcm_accel_cmd = self.long_pid.update(error_future,
                                                speed=CS.out.vEgo,
                                                feedforward=pcm_accel_cmd,
                                                freeze_integrator=actuators.longControlState != LongCtrlState.pid)
+
         else:
           self.long_pid.reset()
 
