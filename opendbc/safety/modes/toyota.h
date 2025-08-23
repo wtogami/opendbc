@@ -235,8 +235,8 @@ static bool toyota_tx_hook(const CANPacket_t *msg) {
       }
     }
 
-    if (addr == 0x183) {
-      int desired_accel = (GET_BYTE(to_send, 0) << 8) | GET_BYTE(to_send, 1);
+    if (msg->addr == 0x183) {
+      int desired_accel = (msg->data[0] << 8) | msg->data[1];
       desired_accel = to_signed(desired_accel, 16);
 
       tx = !longitudinal_accel_checks(desired_accel, TOYOTA_LONG_LIMITS);
