@@ -7,7 +7,7 @@ from opendbc.car.common.conversions import Conversions as CV
 from opendbc.car.common.filter_simple import FirstOrderFilter
 from opendbc.car.interfaces import CarStateBase
 from opendbc.car.toyota.values import ToyotaFlags, CAR, DBC, STEER_THRESHOLD, NO_STOP_TIMER_CAR, \
-                                                  TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR
+                                                  TSS2_CAR, RADAR_ACC_CAR, EPS_SCALE, UNSUPPORTED_DSU_CAR, SECOC_CAR
 from opendbc.sunnypilot.car.toyota.carstate_ext import CarStateExt
 from opendbc.sunnypilot.car.toyota.values import ToyotaFlagsSP
 
@@ -273,7 +273,9 @@ class CarState(CarStateBase, CarStateExt):
       if self.CP.carFingerprint not in RADAR_ACC_CAR or (self.CP_SP.flags & ToyotaFlagsSP.SMART_DSU and not self.CP_SP.flags & ToyotaFlagsSP.RADAR_CAN_FILTER):
         # distance button is wired to the ACC module (camera or radar)
         prev_distance_button = self.distance_button
-        if self.CP.carFingerprint not in RADAR_ACC_CAR:
+        if self.CP.carFingerprint in SECOC_CAR:
+          self.distance_button = cp.vl["PCM_CRUISE_4"]["DISTANCE"]
+        elif self.CP.carFingerprint not in RADAR_ACC_CAR:
           self.distance_button = cp_acc.vl["ACC_CONTROL"]["DISTANCE"]
         else:
           self.distance_button = cp.vl["SDSU"]["FD_BUTTON"]
